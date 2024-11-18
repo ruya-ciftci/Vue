@@ -1,0 +1,68 @@
+; 1. Veritabanı Şeması ve Modeli (schemas/user.schema.ts)
+; Bu dosyada MongoDB'de kullanıcıların nasıl saklanacağını tanımlıyorum.
+
+; Neler içeriyor?
+
+; User adında bir sınıf: Kullanıcıların username ve password alanlarını temsil ediyor.
+; UserSchema: MongoDB'ye şemanın nasıl görüneceğini anlatıyor. Örneğin:
+; username: Bir metin (String) türünde ve zorunlu.
+; password: Aynı şekilde zorunlu bir metin.
+; Bu dosya nerede kullanılıyor?
+
+; UserSchema, Mongoose ile entegre edilip UsersModule'e ekleniyor. Bu sayede kullanıcı bilgilerini sorgulamak veya oluşturmak için kullanıyorum.
+; 2. Kullanıcı Modülü (users.module.ts)
+; Bu dosya, kullanıcı işlemlerinin merkezi. Tüm kullanıcılarla ilgili servisler ve kontrolcüler buradan erişiliyor.
+
+; Ne içeriyor?
+
+; MongooseModule.forFeature: Veritabanına bağlanırken UserSchema'yı kullanıyor.
+; UsersService: Kullanıcılarla ilgili iş mantığını barındırıyor. Örneğin, kullanıcı ekleme ya da sorgulama işlemleri.
+; UserController: Kullanıcılarla ilgili API isteklerini işliyor.
+; Buradaki kritik nokta?
+
+; Eğer bir modül dışarıdan bir servise (örneğin, AuthModule) ihtiyaç duyuyorsa, onu burada içeri aktarıyorum (imports kısmında).
+; 3. Yetkilendirme Modülü (auth.module.ts ve jwt.strategy.ts)
+; Bu modül, kullanıcıların kimlik doğrulama işlemlerini gerçekleştiriyor. Örneğin, kullanıcı giriş yaptıktan sonra JWT (JSON Web Token) ile doğrulanmasını sağlıyorum.
+
+; auth.module.ts
+; Ne yapıyor?
+
+; Kullanıcı doğrulama ile ilgili servisleri ve stratejileri bir araya getiriyor.
+; JwtModule: JWT tokenlarını üretmek ve doğrulamak için gerekli.
+; jwt.strategy.ts
+; Ne yapıyor?
+
+; Gelen isteklerdeki JWT token'ı kontrol ediyor.
+; validate metodu ile token içindeki bilgiyi alıp kullanıcıyı doğruluyorum. Kullanıcı var mı, yok mu kontrol ediyor.
+; 4. Kullanıcı Servisi (users.service.ts)
+; Bu servis, kullanıcılarla ilgili tüm veritabanı işlemlerini gerçekleştiriyor.
+
+; Ne içeriyor?
+
+; findOne: Veritabanında bir kullanıcıyı buluyor. Kullanıcı adı veya ID gibi parametrelerle çalışıyor.
+; create: Yeni bir kullanıcı ekliyor. Parolayı kaydetmeden önce şifreliyorum (bcrypt kullanarak).
+; Bu servis nerelerde kullanılıyor?
+
+; AuthService: Giriş işlemi sırasında kullanıcının kimlik bilgilerini doğrulamak için.
+; UserController: Kullanıcı ekleme veya sorgulama API'si için.
+; 5. Yetkilendirme Servisi (auth.service.ts)
+; Bu servis, kullanıcı giriş işlemini yönetiyor.
+
+; Ne içeriyor?
+
+; login: Kullanıcı adı ve şifreyi alıyor. Şifre doğruysa JWT token üretiyor.
+; validateUser: Kullanıcı adı ve şifreyi kontrol ediyor.
+; Nasıl kullanıyorum?
+
+; Giriş yapmak isteyen kullanıcılar için JWT token oluşturuyorum.
+; Bu token, sonraki API isteklerinde kullanıcının doğrulanmasını sağlıyor.
+; 6. .env Dosyası
+; Bu dosya, gizli bilgileri saklıyor. Örneğin:
+
+; MONGO_URI: MongoDB bağlantı adresi.
+; JWT_SECRET: JWT token'ı imzalamak için kullanılan gizli anahtar.
+; Bu dosyadaki bilgiler, ConfigModule ile projeme otomatik olarak yükleniyor. Böylece bu değerleri kodda doğrudan yazmıyorum, güvenliği artırıyorum.
+
+; 7. Sorunların Çözümü İçin Yaptıklarım
+; "Dependency Injection" Sorunu: AuthModule ile UsersModule arasında eksik olan bağımlılığı düzelttim. Kullanıcı modeli (UserSchema) doğru bir şekilde paylaşılmadığı için hata alıyordum. Bunu, modülleri birbiriyle ilişkilendirerek çözdüm.
+; Mongoose Kullanımı: Tüm veritabanı işlemlerini doğru bağlamak için MongooseModule.forFeature kısmına dikkat ettim.
